@@ -71,22 +71,20 @@
 
 (defun generate (phrase)
   "Generate a random readme or phrase."
-  (cond
-    ((listp phrase)
-     (mappend #'generate phrase))
-    ((rewrites phrase)
-     (generate (random-elt (rewrites phrase))))
-    (t (list phrase))))
+  (cond ((listp phrase)
+         (mappend #'generate phrase))
+        ((rewrites phrase)
+         (generate (random-elt (rewrites phrase))))
+        (t (list phrase))))
 
 (defun generate-tree (phrase)
   "Generate the AST of the readme."
-  (cond
-    ((listp phrase)
-     (mapcar #'generate-tree phrase))
-    ((rewrites phrase)
-     (cons phrase
-           (generate-tree (random-elt (rewrites phrase)))))
-    (t (list phrase))))
+  (cond ((listp phrase)
+         (mapcar #'generate-tree phrase))
+        ((rewrites phrase)
+         (cons phrase
+               (generate-tree (random-elt (rewrites phrase)))))
+        (t (list phrase))))
 
 ;; grammar interacting rules
 (defun rule-lhs (rule)

@@ -1,6 +1,6 @@
 ;; this time we will take a smarter approach
 ;; our grammar will be placed as such :
-;; 
+;;
 ;; Sentence    => Noun-Phrase + Verb-Phrase
 ;; Noun-Phrase => Article + Noun
 ;; Verb-Phrase => Verb + Noun-Phrase
@@ -38,24 +38,22 @@
 
 (defun generate-tree (phrase)
   "Generate a random sentence or phrase, with a complete parse tree."
-  (cond
-    ((listp phrase)
-     (mapcar #'generate-tree phrase))
-    ((rewrites phrase)
-     (cons phrase
-           (generate-tree (random-elt (rewrites phrase)))))
-    (t (list phrase))))
+  (cond ((listp phrase)
+         (mapcar #'generate-tree phrase))
+        ((rewrites phrase)
+         (cons phrase
+               (generate-tree (random-elt (rewrites phrase)))))
+        (t (list phrase))))
 
 (defun generate-all (phrase)
   "Generate a list of all possible expansions of this phrase."
-  (cond
-    ((null phrase) (list nil))
-    ((listp phrase)
-     (combine-all (generate-all (first phrase))
-                  (generate-all (rest phrase))))
-    ((rewrites phrase)
-     (mappend #'generate-all (rewrites phrase)))
-    (t (list (list phrase)))))
+  (cond ((null phrase) (list nil))
+        ((listp phrase)
+         (combine-all (generate-all (first phrase))
+                      (generate-all (rest phrase))))
+        ((rewrites phrase)
+         (mappend #'generate-all (rewrites phrase)))
+        (t (list (list phrase)))))
 
 (defun combine-all (xlist ylist)
   "Return a list of lists formed by appending a y to an x.
@@ -67,12 +65,11 @@ E.g., (combine-all '((a) (b)) '((1) (2)))
 
 (defun generate (phrase)
   "Generate a random sentence or phrase."
-  (cond
-    ((listp phrase)
-     (mappend #'generate phrase))
-    ((rewrites phrase)
-     (generate (random-elt (rewrites phrase))))
-    (t (list phrase))))
+  (cond ((listp phrase)
+         (mappend #'generate phrase))
+        ((rewrites phrase)
+         (generate (random-elt (rewrites phrase))))
+        (t (list phrase))))
 
 ;; grammar interacting rules
 (defun rule-lhs (rule)
