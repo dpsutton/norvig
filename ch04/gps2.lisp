@@ -1,4 +1,6 @@
-;; this was copied from gps1.lisp and then modified
+
+(in-package :gps)
+
 (defvar *ops* nil "A list of available operators.")
 
 (defstruct op "An operation"
@@ -139,18 +141,18 @@ or if there is an appropriate op for it this is applicable."
 ;; EXAMPLE OUTPUT AND USAGE
 ;; (gps '(son-at-home car-needs-battery have-money have-phone-book) '(son-at-school) *school-ops*)
 
-;; (EXECUTING LOOK-UP-NUMBER) 
-;; (EXECUTING TELEPHONE-SHOP) 
-;; (EXECUTING TELL-SHOP-PROBLEM) 
-;; (EXECUTING GIVE-SHOP-MONEY) 
-;; (EXECUTING SHOP-INSTALLS-BATTERY) 
-;; (EXECUTING DRIVE-SON-TO-SCHOOL) 
+;; (EXECUTING LOOK-UP-NUMBER)
+;; (EXECUTING TELEPHONE-SHOP)
+;; (EXECUTING TELL-SHOP-PROBLEM)
+;; (EXECUTING GIVE-SHOP-MONEY)
+;; (EXECUTING SHOP-INSTALLS-BATTERY)
+;; (EXECUTING DRIVE-SON-TO-SCHOOL)
 ;; SOLVED
 ;; * (gps '(son-at-home car-needs-battery have-money) '(son-at-school) *school-ops*)
 
 ;; NIL
 ;; * (gps '(son-at-home car-works) '(son-at-school) *school-ops*)
 
-;; (EXECUTING DRIVE-SON-TO-SCHOOL) 
+;; (EXECUTING DRIVE-SON-TO-SCHOOL)
 ;; SOLVED
-;; * 
+;; *
