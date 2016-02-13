@@ -1,4 +1,4 @@
 (in-package :cl-user)
 (defpackage :gps
-  (:use :common-lisp)
-  (:export :*school-ops* :gps))
+  (:use :cl)
+  (:export :*school-ops* :gps :*banana-ips* :op))
