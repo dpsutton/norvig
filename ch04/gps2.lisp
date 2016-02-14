@@ -1,4 +1,3 @@
-
 (in-package :gps)
 
 (defvar *ops* nil "A list of available operators.")
@@ -25,10 +24,22 @@
 
 (defun GPS (state goals &optional (*ops* *ops*))
   "General Problem Solver: from state, achieve goals using *ops*."
-  (remove-if #'atom (achieve-all (cons '(start) state) goals nil)))
+  (find-all-if #'action-p
+               (achieve-all (cons '(start) state) goals nil)))
+
+(setf (symbol-function 'find-all-if) #'remove-if-not)
+
+(defun action-p (x)
+  "Is x something that is (start) or (executing ...)?"
+  (or (equal x '(start)) (executing-p x)))
 
 (defun achieve-all (state goals goal-stack)
-  "Achieve each goal, and make sure that they still hold at the end."
+  "Achieve each goal, trying serveral orderings."
+  (some #'(lambda (goals) (achieve-each state goals goal-stack))
+        (orderings goals)))
+
+(defun achieve-each (state goals goal-stack)
+  "Achieve each goal, and make sure they still hold at the end."
   (let ((current-state state))
     (if (and (every #'(lambda (g)
                         (setf current-state
@@ -37,6 +48,11 @@
              (subsetp goals current-state :test #'equal))
         current-state)))
 
+(defun orderings (l)
+  (if (> (length l) 1)
+      (list l (reverse l))
+      (list l)))
+
 (defun achieve (state goal goal-stack)
   "A goal is achieved if it already holds,
 or if there is an appropriate op for it this is applicable."
@@ -44,7 +60,16 @@ or if there is an appropriate op for it this is applicable."
   (cond ((member-equal goal state) state)
         ((member-equal goal goal-stack) nil)
         (t (some #'(lambda (op) (apply-op state goal op goal-stack))
-                 (find-all goal *ops* :test #'appropriate-p)))))
+                 (appropriate-ops goal state)))))
+
+(defun appropriate-ops (goal state)
+  "Return a list of appropriate operators, sorted by the number of
+  unfulfilled preconditions."
+  (sort (copy-list (find-all goal *ops* :test #'appropriate-p))
+        #'< :key #'(lambda (op)
+                     (count-if
+                      #'(lambda (precond) (not (member-equal precond state)))
+                      (op-preconds op)))))
 
 (defun member-equal (item list)
   (member item list :test #'equal))
@@ -148,8 +173,52 @@ or if there is an appropriate op for it this is applicable."
              (12 11) (11 6) (11 16) (16 17) (17 22) (21 22) (22 23)
              (23 18) (23 24) (24 19) (19 20) (20 15) (15 10) (10 5) (20 25))))
 
+(defun find-path (start end)
+  "Search a maze for a path from start to end."
+  (let ((results (GPS `((at ,start)) `((at ,end)))))
+    (unless (null results)
+      (cons start (mapcar #'destination
+                          (remove '(start) results :test #'equal))))))
+
+(defun destination (action)
+  "Find the Y in (executing (move from X to Y))."
+  (fifth (second action)))
+
 ;; (use *maze-ops*)
 ;; (gps '((at 1)) '((at 25)))
+
+;; ; ======================= blocks
+(defun make-block-ops (blocks)
+  (let ((ops nil))
+    (dolist (a blocks)
+      (dolist (b blocks)
+        (unless (equal a b)
+          (dolist (c blocks)
+            (unless (or (equal c a) (equal c b))
+              (push (move-op a b c) ops)))
+          (push (move-op a 'table b) ops)
+          (push (move-op a b 'table) ops))))
+    ops))
+
+(defun move-op (a b c)
+  "Make an operator to move A from B to C."
+  (op `(move ,a from ,b to ,c)
+      :preconds `((space on ,a) (space on ,c) (,a on ,b))
+      :add-list (move-ons a b c)
+      :del-list (move-ons a c b)))
+
+(defun move-ons (a b c)
+  (if (eq b 'table)
+      `((,a on ,c))
+      `((,a on ,c) (space on ,b))))
+
+;; (gps '((a on table) (b on table) (space on a) (space on b) (space on table)) '((a on b) (b on table)))
+
+;; (gps '((a on b) (b on c) (c on table) (space on a) (space on
+;; table)) '((c on b) (b on a))) here, we clobber our goal
+;; achieving. but it is still possible. for instance, if we switch the
+;; order the ending goals, we can achieve them. So we reorder achieve
+;; all and we can get there
 
 ;; convert existing data rather than abandon
 (mapc #'convert-op *school-ops*)
