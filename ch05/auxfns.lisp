@@ -207,7 +207,7 @@
 ;;; else.  This has not been done (for compatibility with the book).  
 
 
-(dqefun symbol (&rest args)
+(defun symbol (&rest args)
   "Concatenate symbols or strings to form an interned symbol"
   (intern (format nil "~{~a~}" args)))
 
